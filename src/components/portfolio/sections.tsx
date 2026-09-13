@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Instagram, Linkedin, Mail, MessageCircle, Ghost, MapPin } from "lucide-react";
+import { Instagram, Linkedin, Mail, MessageCircle, Ghost, MapPin, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Eyebrow, MagneticButton, MediaFrame, Reveal, type MediaType } from "./primitives";
@@ -94,7 +94,7 @@ export function Hero() {
             href="#work"
             className="rounded-full bg-primary px-8 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-primary-foreground glow-accent"
           >
-            View my work
+            Press Play
           </MagneticButton>
         </div>
       </motion.div>
@@ -191,7 +191,7 @@ export function FeaturedReel({
         transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
         className="relative mx-3 overflow-hidden rounded-2xl border border-primary/30 glow-accent md:mx-8"
       >
-        <div className="aspect-[21/9] w-full" data-cursor="play">
+        <div className="aspect-[21/9] w-full md:aspect-[21/9] sm:aspect-video" data-cursor="play">
           <MediaFrame src={videoUrl ?? reelImg} mediaType={mediaType} alt="Featured showreel" />
         </div>
         <div className="pointer-events-none absolute right-5 top-5 [perspective:600px]">
@@ -201,6 +201,85 @@ export function FeaturedReel({
         </div>
       </motion.div>
     </section>
+  );
+}
+
+/* ================= Lightbox Modal ================= */
+type LightboxProject = Project & { index: number };
+
+function LightboxModal({
+  project,
+  isOpen,
+  onClose,
+}: {
+  project: LightboxProject | null;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !project) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute inset-0 z-50 flex items-center justify-center p-4"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="relative w-full max-w-4xl">
+            <div className="overflow-hidden rounded-2xl border border-border bg-card glow-accent">
+              <div className="aspect-video w-full">
+                <MediaFrame
+                  src={project.src}
+                  mediaType={project.mediaType}
+                  alt={`${project.category} project — ${project.title}`}
+                  showPlayIcon={true}
+                />
+              </div>
+              <div className="px-6 py-4">
+                <h3 className="font-display text-lg font-semibold">{project.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{project.category}</p>
+              </div>
+            </div>
+
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              aria-label="Close lightbox"
+              className="absolute -right-12 -top-12 rounded-full bg-background/20 p-2 transition-all hover:bg-background/40 md:relative md:-right-0 md:-top-0 md:ml-4 md:inline-flex md:border md:border-border md:bg-card"
+            >
+              <X className="size-6" />
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
@@ -222,6 +301,9 @@ const CATEGORIES = [
   "Wedding Photography",
 ] as const;
 
+// NOTE: The three automotive cards (Midnight GT, Desert Roll, Showroom Teaser) 
+// are currently using the same placeholder image. Update with distinct automotive 
+// thumbnails when real assets become available.
 const PROJECTS: Project[] = [
   { title: "Midnight GT", category: "Automotive", src: catAutomotive, mediaType: "image" },
   { title: "Desert Roll — Automotive 02", category: "Automotive", src: catAutomotive, mediaType: "image" },
@@ -248,68 +330,78 @@ const PROJECTS: Project[] = [
 
 export function Work() {
   const [active, setActive] = useState<string>(CATEGORIES[0]);
+  const [selectedProject, setSelectedProject] = useState<LightboxProject | null>(null);
   const items = PROJECTS.filter((p) => p.category === active);
 
   return (
-    <section id="work" className="mx-auto max-w-7xl px-5 py-24 md:px-10 md:py-32">
-      <Reveal>
-        <Eyebrow>Work</Eyebrow>
-        <h2 className="mt-4 text-4xl font-bold md:text-6xl">My Work</h2>
-      </Reveal>
+    <>
+      <section id="work" className="mx-auto max-w-7xl px-5 py-24 md:px-10 md:py-32">
+        <Reveal>
+          <Eyebrow>Work</Eyebrow>
+          <h2 className="mt-4 text-4xl font-bold md:text-6xl">My Work</h2>
+        </Reveal>
 
-      <Reveal delay={0.08}>
-        <div className="mt-10 flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => (
-            <button
-              key={c}
-              onClick={() => setActive(c)}
-              className={cn(
-                "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-300",
-                active === c
-                  ? "bg-primary text-primary-foreground glow-accent"
-                  : "border border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
-              )}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      </Reveal>
+        <Reveal delay={0.08}>
+          <div className="mt-10 flex flex-wrap gap-2">
+            {CATEGORIES.map((c) => (
+              <button
+                key={c}
+                onClick={() => setActive(c)}
+                className={cn(
+                  "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-300",
+                  active === c
+                    ? "bg-primary text-primary-foreground glow-accent"
+                    : "border border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
+                )}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        </Reveal>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={active}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.35 }}
-          className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {items.map((p) => (
-            <article
-              key={p.title}
-              data-cursor="play"
-              className="group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-500 hover:-translate-y-1 hover:border-primary/40 hover:glow-accent"
-            >
-              <div className="aspect-video w-full">
-                <MediaFrame
-                  src={p.src}
-                  mediaType={p.mediaType}
-                  alt={`${p.category} project — ${p.title}`}
-                  playOnHoverOnly
-                />
-              </div>
-              <div className="flex items-center justify-between px-4 py-4">
-                <h3 className="font-display text-sm font-semibold">{p.title}</h3>
-                <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  {p.category}
-                </span>
-              </div>
-            </article>
-          ))}
-        </motion.div>
-      </AnimatePresence>
-    </section>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={active}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+            className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {items.map((p, idx) => (
+              <button
+                key={p.title}
+                onClick={() => setSelectedProject({ ...p, index: idx })}
+                data-cursor="play"
+                className="group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-500 hover:-translate-y-1 hover:border-primary/40 hover:glow-accent cursor-pointer text-left"
+              >
+                <div className="aspect-video w-full">
+                  <MediaFrame
+                    src={p.src}
+                    mediaType={p.mediaType}
+                    alt={`${p.category} project — ${p.title}`}
+                    playOnHoverOnly
+                  />
+                </div>
+                <div className="flex items-center justify-between px-4 py-4">
+                  <h3 className="font-display text-sm font-semibold">{p.title}</h3>
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    {p.category}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </motion.div>
+        </AnimatePresence>
+      </section>
+
+      <LightboxModal
+        project={selectedProject}
+        isOpen={Boolean(selectedProject)}
+        onClose={() => setSelectedProject(null)}
+      />
+    </>
   );
 }
 
