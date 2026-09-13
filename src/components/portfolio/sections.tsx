@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Instagram, Linkedin, Mail, MessageCircle, Ghost, MapPin, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -73,9 +73,24 @@ export function Hero() {
     }
   }, []);
 
+  const shouldReduceMotion = useReducedMotion();
+
+  // Stagger timing for sequence
+  const baseDelay = shouldReduceMotion ? 0 : 0.1; // Start delay after bg fade begins
+  const staggerDelay = shouldReduceMotion ? 0 : 0.15; // Delay between each element
+  const bgDuration = shouldReduceMotion ? 0 : 0.8; // Background fade-in duration
+  const elementDuration = shouldReduceMotion ? 0 : 0.6; // Individual element fade/slide duration
+  const ease = [0.22, 1, 0.36, 1];
+
   return (
     <section id="top" className="relative flex min-h-[100svh] items-center justify-center">
-      <div className="grain absolute inset-0 overflow-hidden">
+      {/* Background image with fade-in animation */}
+      <motion.div
+        className="grain absolute inset-0 overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: bgDuration, ease }}
+      >
         <img
           src={heroImg}
           alt="Cinematic night shot of a videographer at work"
@@ -84,34 +99,104 @@ export function Hero() {
           className="h-full w-full object-cover"
         />
         <div className="absolute inset-0 veil" />
-      </div>
+      </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        className="relative z-10 px-6 text-center"
-      >
-        <h1 className="font-display text-[13vw] font-bold leading-[0.92] md:text-8xl">
+      {/* Staggered text content container */}
+      <div className="relative z-10 px-6 text-center">
+        {/* Name heading with staggered fade-in and slide-up */}
+        <motion.h1
+          className="font-display text-[13vw] font-bold leading-[0.92] md:text-8xl"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: elementDuration,
+            delay: baseDelay,
+            ease,
+          }}
+        >
           Mohamed
           <br />
           Rezwin Ashraf
-        </h1>
-        <p className="mt-4 font-display text-lg tracking-[0.2em] text-primary uppercase md:text-2xl">
+        </motion.h1>
+
+        {/* Role subheading */}
+        <motion.p
+          className="mt-4 font-display text-lg tracking-[0.2em] text-primary uppercase md:text-2xl"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: elementDuration,
+            delay: baseDelay + staggerDelay,
+            ease,
+          }}
+        >
           Videographer / Editor
-        </p>
-        <p className="mx-auto mt-4 max-w-md text-sm text-muted-foreground md:text-base">
+        </motion.p>
+
+        {/* Tagline */}
+        <motion.p
+          className="mx-auto mt-4 max-w-md text-sm text-muted-foreground md:text-base"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: elementDuration,
+            delay: baseDelay + staggerDelay * 2,
+            ease,
+          }}
+        >
           Crafting stories through the lens.
-        </p>
-        <div className="mt-10">
+        </motion.p>
+
+        {/* CTA Button */}
+        <motion.div
+          className="mt-10"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: elementDuration,
+            delay: baseDelay + staggerDelay * 3,
+            ease,
+          }}
+        >
           <MagneticButton
             href="#work"
             className="rounded-full bg-primary px-8 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-primary-foreground glow-accent font-cta"
           >
             Press Play
           </MagneticButton>
-        </div>
-      </motion.div>
+        </motion.div>
+
+        {/* Ticker / Marquee strip below hero */}
+        <motion.div
+          className="mt-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: elementDuration,
+            delay: baseDelay + staggerDelay * 4,
+            ease,
+          }}
+        >
+          <div className="group overflow-hidden border-y border-border bg-background/40 py-3 backdrop-blur-sm">
+            <div className="marquee-track group-hover:[animation-play-state:paused]">
+              {[0, 1].map((k) => (
+                <div key={k} className="flex shrink-0">
+                  {["Videographer", "Editor", "Storyteller", "Dubai, UAE", "Colorist", "Reels"].map(
+                    (w, i) => (
+                      <span
+                        key={`${k}-${i}`}
+                        className="px-6 text-[11px] font-semibold uppercase tracking-[0.35em] text-primary/80"
+                      >
+                        {w} —
+                      </span>
+                    )
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      </div>
     </section>
   );
 }
