@@ -93,10 +93,10 @@ export function Hero() {
       >
         <img
           src={heroImg}
-          alt="Cinematic night shot of a videographer at work"
+          alt="Mohamed Rezwin Ashraf, videographer and video editor, holding a professional camera gimbal in a cinematic studio setting"
           width={1920}
           height={1088}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover object-center md:object-right"
         />
         <div className="absolute inset-0 veil" />
       </motion.div>
@@ -237,11 +237,11 @@ export function About() {
             <div className="grain overflow-hidden rounded-2xl glow-soft">
               <img
                 src={portraitImg}
-                alt="Portrait of Mohamed Rezwin Ashraf holding a cinema camera"
+                alt="Mohamed Rezwin Ashraf, videographer, in a professional studio with cinematic lighting"
                 width={912}
                 height={1104}
                 loading="lazy"
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover object-center"
               />
             </div>
           </Reveal>
