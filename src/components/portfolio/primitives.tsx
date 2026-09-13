@@ -1,6 +1,6 @@
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform, useScroll } from "framer-motion";
 import { Play } from "lucide-react";
-import { useRef, type ReactNode } from "react";
+import { useRef, type ReactNode, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 /* ---------- Magnetic button ---------- */
@@ -80,12 +80,55 @@ export function Reveal({
   );
 }
 
+/* ---------- Scroll-linked fade (full section) ---------- */
+export function ScrollFadeSection({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollY } = useScroll();
+  const [elementTop, setElementTop] = useState(0);
+  const [elementHeight, setElementHeight] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const updateDimensions = () => {
+      setElementTop(el.offsetTop);
+      setElementHeight(el.offsetHeight);
+    };
+
+    updateDimensions();
+    window.addEventListener("resize", updateDimensions);
+    return () => window.removeEventListener("resize", updateDimensions);
+  }, []);
+
+  const opacity = useTransform(scrollY, (y) => {
+    const elementCenter = elementTop + elementHeight / 2;
+    const viewportCenter = y + window.innerHeight / 2;
+    const distance = Math.abs(elementCenter - viewportCenter);
+    const maxDistance = window.innerHeight;
+
+    return Math.max(0, 1 - distance / maxDistance);
+  });
+
+  return (
+    <motion.div ref={ref} style={{ opacity }} className={className}>
+      {children}
+    </motion.div>
+  );
+}
+
 export function Eyebrow({ children }: { children: ReactNode }) {
   return <p className="eyebrow">— {children}</p>;
 }
 
-/* ---------- Media frame (video-ready) ---------- */
-export type MediaType = "image" | "video";
+/* ---------- Media frame (video-ready, Instagram-ready) ---------- */
+export type MediaType = "image" | "video" | "instagram";
 
 export function MediaFrame({
   src,
@@ -104,6 +147,46 @@ export function MediaFrame({
   showPlayIcon?: boolean;
   playOnHoverOnly?: boolean;
 }) {
+  const [isLoading, setIsLoading] = useState(true);
+
+  // For Instagram reels, src is the embed URL; we show the thumbnail until clicked
+  // The actual iframe is rendered in LightboxModal
+  if (mediaType === "instagram") {
+    return (
+      <div className={cn("grain group/media relative h-full w-full overflow-hidden", className)}>
+        {/* Static thumbnail fallback or placeholder */}
+        <div className="h-full w-full bg-background/50">
+          {poster ? (
+            <img
+              src={poster}
+              alt={alt}
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-700 group-hover/media:scale-105"
+              onLoad={() => setIsLoading(false)}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center bg-background/70">
+              <span className="text-xs text-muted-foreground">Instagram Reel</span>
+            </div>
+          )}
+        </div>
+        <div className="pointer-events-none absolute inset-0 bg-background/30" />
+        {showPlayIcon && (
+          <div
+            className={cn(
+              "pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity duration-300",
+              playOnHoverOnly ? "opacity-0 group-hover/media:opacity-100" : "opacity-100",
+            )}
+          >
+            <span className="glow-accent flex size-16 items-center justify-center rounded-full bg-background/55 backdrop-blur-sm">
+              <Play className="size-6 translate-x-[2px] fill-current text-primary" />
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={cn("grain group/media relative h-full w-full overflow-hidden", className)}>
       {mediaType === "video" ? (
