@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Instagram, Linkedin, Mail, MessageCircle, Ghost, MapPin, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Eyebrow, MagneticButton, MediaFrame, Reveal, type MediaType } from "./primitives";
+import { Eyebrow, MagneticButton, MediaFrame, Reveal, ScrollFadeSection, type MediaType } from "./primitives";
 
 import heroImg from "@/assets/hero.jpg";
 import portraitImg from "@/assets/portrait.jpg";
@@ -59,6 +59,20 @@ export function Navbar() {
 
 /* ================= Hero ================= */
 export function Hero() {
+  useEffect(() => {
+    // Load Instagram embed script once at app root
+    if (!window.instagramEmbedLoaded) {
+      const script = document.createElement("script");
+      script.src = "https://www.instagram.com/embed.js";
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        window.instagramEmbedLoaded = true;
+      };
+      document.body.appendChild(script);
+    }
+  }, []);
+
   return (
     <section id="top" className="relative flex min-h-[100svh] items-center justify-center">
       <div className="grain absolute inset-0 overflow-hidden">
@@ -92,7 +106,7 @@ export function Hero() {
         <div className="mt-10">
           <MagneticButton
             href="#work"
-            className="rounded-full bg-primary px-8 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-primary-foreground glow-accent"
+            className="rounded-full bg-primary px-8 py-4 text-xs font-semibold uppercase tracking-[0.22em] text-primary-foreground glow-accent font-cta"
           >
             Press Play
           </MagneticButton>
@@ -131,43 +145,45 @@ const TOOLS = ["DaVinci Resolve", "Final Cut Pro", "Adobe Premiere Pro", "CapCut
 
 export function About() {
   return (
-    <section id="about" className="mx-auto max-w-7xl px-5 py-24 md:px-10 md:py-36">
-      <div className="grid items-center gap-12 md:grid-cols-2 md:gap-16">
-        <Reveal>
-          <div className="grain overflow-hidden rounded-2xl glow-soft">
-            <img
-              src={portraitImg}
-              alt="Portrait of Mohamed Rezwin Ashraf holding a cinema camera"
-              width={912}
-              height={1104}
-              loading="lazy"
-              className="h-full w-full object-cover"
-            />
-          </div>
-        </Reveal>
-        <Reveal delay={0.1}>
-          <Eyebrow>About</Eyebrow>
-          <h2 className="mt-4 text-4xl font-bold md:text-6xl">About</h2>
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
-            Creative and passionate Video Editor & Videographer with experience in cinematic video
-            editing, reels, wedding videos, travel content, and social media content creation.
-            Skilled in storytelling, color grading, transitions, sound design, and camera handling.
-          </p>
+    <ScrollFadeSection>
+      <section id="about" className="mx-auto max-w-7xl px-5 py-24 md:px-10 md:py-36">
+        <div className="grid items-center gap-12 md:grid-cols-2 md:gap-16">
+          <Reveal>
+            <div className="grain overflow-hidden rounded-2xl glow-soft">
+              <img
+                src={portraitImg}
+                alt="Portrait of Mohamed Rezwin Ashraf holding a cinema camera"
+                width={912}
+                height={1104}
+                loading="lazy"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <Eyebrow>About</Eyebrow>
+            <h2 className="mt-4 text-4xl font-bold md:text-6xl">About</h2>
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground">
+              Creative and passionate Video Editor & Videographer with experience in cinematic video
+              editing, reels, wedding videos, travel content, and social media content creation.
+              Skilled in storytelling, color grading, transitions, sound design, and camera handling.
+            </p>
 
-          <p className="mt-10 eyebrow">Software Skills</p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            {TOOLS.map((t) => (
-              <span
-                key={t}
-                className="rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground/90 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:glow-accent"
-              >
-                {t}
-              </span>
-            ))}
-          </div>
-        </Reveal>
-      </div>
-    </section>
+            <p className="mt-10 eyebrow">Software Skills</p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {TOOLS.map((t) => (
+                <span
+                  key={t}
+                  className="rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground/90 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:glow-accent"
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </section>
+    </ScrollFadeSection>
   );
 }
 
@@ -180,27 +196,29 @@ export function FeaturedReel({
   mediaType?: MediaType;
 }) {
   return (
-    <section className="py-20 md:py-32">
-      <div className="mb-10 px-5 text-center md:px-10">
-        <Eyebrow>Showreel</Eyebrow>
-      </div>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        className="relative mx-3 overflow-hidden rounded-2xl border border-primary/30 glow-accent md:mx-8"
-      >
-        <div className="aspect-[21/9] w-full md:aspect-[21/9] sm:aspect-video" data-cursor="play">
-          <MediaFrame src={videoUrl ?? reelImg} mediaType={mediaType} alt="Featured showreel" />
+    <ScrollFadeSection>
+      <section className="py-20 md:py-32">
+        <div className="mb-10 px-5 text-center md:px-10">
+          <Eyebrow>Showreel</Eyebrow>
         </div>
-        <div className="pointer-events-none absolute right-5 top-5 [perspective:600px]">
-          <div className="flip-badge rounded-full border border-primary/50 bg-background/70 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-primary backdrop-blur">
-            Reel · 2026 · Showreel
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          className="relative mx-3 overflow-hidden rounded-2xl border border-primary/30 glow-accent md:mx-8"
+        >
+          <div className="aspect-[21/9] w-full md:aspect-[21/9] sm:aspect-video" data-cursor="play">
+            <MediaFrame src={videoUrl ?? reelImg} mediaType={mediaType} alt="Featured showreel" />
           </div>
-        </div>
-      </motion.div>
-    </section>
+          <div className="pointer-events-none absolute right-5 top-5 [perspective:600px]">
+            <div className="flip-badge rounded-full border border-primary/50 bg-background/70 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-primary backdrop-blur">
+              Reel · 2026 · Showreel
+            </div>
+          </div>
+        </motion.div>
+      </section>
+    </ScrollFadeSection>
   );
 }
 
@@ -234,6 +252,9 @@ function LightboxModal({
 
   if (!isOpen || !project) return null;
 
+  // For Instagram reels, render the embed iframe instead of MediaFrame
+  const isInstagram = project.mediaType === "instagram";
+
   return (
     <AnimatePresence>
       <motion.div
@@ -254,25 +275,44 @@ function LightboxModal({
         >
           <div className="relative w-full max-w-4xl">
             <div className="overflow-hidden rounded-2xl border border-border bg-card glow-accent">
-              <div className="aspect-video w-full">
-                <MediaFrame
-                  src={project.src}
-                  mediaType={project.mediaType}
-                  alt={`${project.category} project — ${project.title}`}
-                  showPlayIcon={true}
-                />
-              </div>
-              <div className="px-6 py-4">
-                <h3 className="font-display text-lg font-semibold">{project.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{project.category}</p>
-              </div>
+              {isInstagram ? (
+                // Instagram reel embed: 9:16 aspect ratio (vertical)
+                <div className="aspect-[9/16] w-full max-w-sm mx-auto bg-background/50 flex items-center justify-center">
+                  <iframe
+                    src={project.src}
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                    allowFullScreen={true}
+                    style={{ maxWidth: "100%" }}
+                    title={project.title}
+                  />
+                </div>
+              ) : (
+                // Regular media (image/video)
+                <>
+                  <div className="aspect-video w-full">
+                    <MediaFrame
+                      src={project.src}
+                      mediaType={project.mediaType}
+                      alt={`${project.category} project — ${project.title}`}
+                      showPlayIcon={true}
+                    />
+                  </div>
+                  <div className="px-6 py-4">
+                    <h3 className="font-display text-lg font-semibold">{project.title}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">{project.category}</p>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Close button */}
             <button
               onClick={onClose}
               aria-label="Close lightbox"
-              className="absolute -right-12 -top-12 rounded-full bg-background/20 p-2 transition-all hover:bg-background/40 md:relative md:-right-0 md:-top-0 md:ml-4 md:inline-flex md:border md:border-border md:bg-card"
+              className="absolute -right-12 -top-12 rounded-full bg-background/20 p-2 transition-all hover:bg-background/40 md:relative md:-right-0 md:-top-0 md:ml-4 md:inline-flex md:border md:border-border"
             >
               <X className="size-6" />
             </button>
@@ -289,6 +329,7 @@ type Project = {
   category: string;
   src: string;
   mediaType: MediaType;
+  instagramUrl?: string; // For linking fallback if iframe fails
 };
 
 const CATEGORIES = [
@@ -301,12 +342,29 @@ const CATEGORIES = [
   "Wedding Photography",
 ] as const;
 
-// NOTE: The three automotive cards (Midnight GT, Desert Roll, Showroom Teaser) 
-// are currently using the same placeholder image. Update with distinct automotive 
-// thumbnails when real assets become available.
+// Instagram Reels: extract shortcodes from URLs
+// DTkr6rtjGzU: https://www.instagram.com/reel/DTkr6rtjGzU/
+// DCWYU6jP7yr: https://www.instagram.com/reel/DCWYU6jP7yr/
+const INSTAGRAM_REELS = [
+  { shortcode: "DTkr6rtjGzU", url: "https://www.instagram.com/reel/DTkr6rtjGzU/" },
+  { shortcode: "DCWYU6jP7yr", url: "https://www.instagram.com/reel/DCWYU6jP7yr/" },
+];
+
 const PROJECTS: Project[] = [
-  { title: "Midnight GT", category: "Automotive", src: catAutomotive, mediaType: "image" },
-  { title: "Desert Roll — Automotive 02", category: "Automotive", src: catAutomotive, mediaType: "image" },
+  {
+    title: "Automotive Reel 01",
+    category: "Automotive",
+    src: `https://www.instagram.com/reel/${INSTAGRAM_REELS[0].shortcode}/embed/`,
+    mediaType: "instagram",
+    instagramUrl: INSTAGRAM_REELS[0].url,
+  },
+  {
+    title: "Automotive Reel 02",
+    category: "Automotive",
+    src: `https://www.instagram.com/reel/${INSTAGRAM_REELS[1].shortcode}/embed/`,
+    mediaType: "instagram",
+    instagramUrl: INSTAGRAM_REELS[1].url,
+  },
   { title: "Showroom Teaser", category: "Automotive", src: catAutomotive, mediaType: "image" },
   { title: "Sara & Ahmed", category: "Wedding", src: catWedding, mediaType: "image" },
   { title: "Golden Hour Vows", category: "Wedding", src: catWedding, mediaType: "image" },
@@ -318,13 +376,23 @@ const PROJECTS: Project[] = [
   { title: "Boutique Opening", category: "PR", src: catPr, mediaType: "image" },
   { title: "Founder Interview", category: "PR", src: catPr, mediaType: "image" },
   { title: "Marina Towers", category: "Architectural", src: catArchitectural, mediaType: "image" },
-  { title: "Villa Walkthrough", category: "Architectural", src: catArchitectural, mediaType: "image" },
+  {
+    title: "Villa Walkthrough",
+    category: "Architectural",
+    src: catArchitectural,
+    mediaType: "image",
+  },
   { title: "Skyline Blue Hour", category: "Architectural", src: catArchitectural, mediaType: "image" },
   { title: "Studio Commercial", category: "Production", src: catProduction, mediaType: "image" },
   { title: "Behind The Scenes 01", category: "Production", src: catProduction, mediaType: "image" },
   { title: "Music Video Set", category: "Production", src: catProduction, mediaType: "image" },
   { title: "Bridal Portraits", category: "Wedding Photography", src: catPhotography, mediaType: "image" },
-  { title: "Engagement Session", category: "Wedding Photography", src: catPhotography, mediaType: "image" },
+  {
+    title: "Engagement Session",
+    category: "Wedding Photography",
+    src: catPhotography,
+    mediaType: "image",
+  },
   { title: "Candid Frames", category: "Wedding Photography", src: catPhotography, mediaType: "image" },
 ];
 
@@ -335,66 +403,68 @@ export function Work() {
 
   return (
     <>
-      <section id="work" className="mx-auto max-w-7xl px-5 py-24 md:px-10 md:py-32">
-        <Reveal>
-          <Eyebrow>Work</Eyebrow>
-          <h2 className="mt-4 text-4xl font-bold md:text-6xl">My Work</h2>
-        </Reveal>
+      <ScrollFadeSection>
+        <section id="work" className="mx-auto max-w-7xl px-5 py-24 md:px-10 md:py-32">
+          <Reveal>
+            <Eyebrow>Work</Eyebrow>
+            <h2 className="mt-4 text-4xl font-bold md:text-6xl">My Work</h2>
+          </Reveal>
 
-        <Reveal delay={0.08}>
-          <div className="mt-10 flex flex-wrap gap-2">
-            {CATEGORIES.map((c) => (
-              <button
-                key={c}
-                onClick={() => setActive(c)}
-                className={cn(
-                  "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-300",
-                  active === c
-                    ? "bg-primary text-primary-foreground glow-accent"
-                    : "border border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
-                )}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-        </Reveal>
+          <Reveal delay={0.08}>
+            <div className="mt-10 flex flex-wrap gap-2">
+              {CATEGORIES.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setActive(c)}
+                  className={cn(
+                    "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-all duration-300",
+                    active === c
+                      ? "bg-primary text-primary-foreground glow-accent"
+                      : "border border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
+                  )}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </Reveal>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={active}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.35 }}
-            className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {items.map((p, idx) => (
-              <button
-                key={p.title}
-                onClick={() => setSelectedProject({ ...p, index: idx })}
-                data-cursor="play"
-                className="group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-500 hover:-translate-y-1 hover:border-primary/40 hover:glow-accent cursor-pointer text-left"
-              >
-                <div className="aspect-video w-full">
-                  <MediaFrame
-                    src={p.src}
-                    mediaType={p.mediaType}
-                    alt={`${p.category} project — ${p.title}`}
-                    playOnHoverOnly
-                  />
-                </div>
-                <div className="flex items-center justify-between px-4 py-4">
-                  <h3 className="font-display text-sm font-semibold">{p.title}</h3>
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                    {p.category}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </motion.div>
-        </AnimatePresence>
-      </section>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={active}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.35 }}
+              className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+            >
+              {items.map((p, idx) => (
+                <button
+                  key={p.title}
+                  onClick={() => setSelectedProject({ ...p, index: idx })}
+                  data-cursor="play"
+                  className="group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-500 hover:-translate-y-1 hover:border-primary/40 hover:glow-accent cursor-pointer"
+                >
+                  <div className="aspect-video w-full">
+                    <MediaFrame
+                      src={p.src}
+                      mediaType={p.mediaType}
+                      alt={`${p.category} project — ${p.title}`}
+                      playOnHoverOnly
+                    />
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-4">
+                    <h3 className="font-display text-sm font-semibold">{p.title}</h3>
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                      {p.category}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </section>
+      </ScrollFadeSection>
 
       <LightboxModal
         project={selectedProject}
@@ -421,41 +491,43 @@ const LINKS = [
 
 export function Contact() {
   return (
-    <section id="contact" className="mx-auto max-w-3xl px-5 py-24 text-center md:py-32">
-      <Reveal>
-        <Eyebrow>Contact</Eyebrow>
-        <h2 className="mt-4 text-4xl font-bold md:text-6xl">Let's Create Something</h2>
-        <p className="mx-auto mt-5 max-w-xl text-muted-foreground">
-          Available for wedding shoots, automotive content, PR campaigns, and creative
-          collaborations.
-        </p>
-      </Reveal>
+    <ScrollFadeSection>
+      <section id="contact" className="mx-auto max-w-3xl px-5 py-24 text-center md:py-32">
+        <Reveal>
+          <Eyebrow>Contact</Eyebrow>
+          <h2 className="mt-4 text-4xl font-bold md:text-6xl">Let's Create Something</h2>
+          <p className="mx-auto mt-5 max-w-xl text-muted-foreground">
+            Available for wedding shoots, automotive content, PR campaigns, and creative
+            collaborations.
+          </p>
+        </Reveal>
 
-      <Reveal delay={0.1}>
-        <ul className="mx-auto mt-12 flex max-w-md flex-col gap-3">
-          {LINKS.map(({ label, href, Icon, name }) => (
-            <li key={name}>
-              <a
-                href={href}
-                target={href.startsWith("http") ? "_blank" : undefined}
-                rel="noreferrer"
-                className="flex items-center gap-4 rounded-xl border border-border bg-card px-5 py-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50 hover:glow-accent"
-              >
-                <Icon className="size-5 text-primary" />
-                <span className="text-sm">{label}</span>
-                <span className="ml-auto text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  {name}
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
+        <Reveal delay={0.1}>
+          <ul className="mx-auto mt-12 flex max-w-md flex-col gap-3">
+            {LINKS.map(({ label, href, Icon, name }) => (
+              <li key={name}>
+                <a
+                  href={href}
+                  target={href.startsWith("http") ? "_blank" : undefined}
+                  rel="noreferrer"
+                  className="flex items-center gap-4 rounded-xl border border-border bg-card px-5 py-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/50 hover:glow-accent"
+                >
+                  <Icon className="size-5 text-primary" />
+                  <span className="text-sm">{label}</span>
+                  <span className="ml-auto text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                    {name}
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
 
-        <div className="mt-10 inline-flex items-center gap-2 rounded-full border border-primary/40 px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-primary">
-          <MapPin className="size-3.5" /> Dubai, UAE
-        </div>
-      </Reveal>
-    </section>
+          <div className="mt-10 inline-flex items-center gap-2 rounded-full border border-primary/40 px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-primary">
+            <MapPin className="size-3.5" /> Dubai, UAE
+          </div>
+        </Reveal>
+      </section>
+    </ScrollFadeSection>
   );
 }
 
